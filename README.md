@@ -41,6 +41,7 @@ argone = "0.1"
 ```rust
 use argone::{ARGS, COMMANDS};
 
+
 ARGS! {
     version = "0.1"
     author = "just-do-halee <just.do.halee@gmail.com>"
@@ -53,7 +54,7 @@ ARGS! {
 
     Args {
         /// Root directory
-        [Config] rootDir: Option<PathBuf> = CURRENT_DIR.clone()
+        [Config] rootDir: Option<PathBuf> = argone::CURRENT_DIR.clone()
 
         /// Sets a custom config file
         #[clap(short, long, default_value = "test")]
@@ -90,4 +91,6 @@ COMMANDS! {
 
     }
 }
+
+println!("{:#?}", *ARGS);
 ```
