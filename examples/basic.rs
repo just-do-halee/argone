@@ -1,44 +1,3 @@
-## ***`argone`***
-
----
-
-Most intuitive global cli maker. *(lazy_static + config-rs + clap)
-
-
-[![CI][ci-badge]][ci-url]
-[![Crates.io][crates-badge]][crates-url]
-[![Licensed][license-badge]][license-url]
-[![Twitter][twitter-badge]][twitter-url]
-
-[ci-badge]: https://github.com/just-do-halee/argone/actions/workflows/rust.yml/badge.svg
-[crates-badge]: https://img.shields.io/crates/v/argone.svg?labelColor=383636
-[license-badge]: https://img.shields.io/crates/l/argone?labelColor=383636
-[twitter-badge]: https://img.shields.io/twitter/follow/do_halee?style=flat&logo=twitter&color=4a4646&labelColor=333131&label=just-do-halee
-
-[ci-url]: https://github.com/just-do-halee/argone/actions
-[twitter-url]: https://twitter.com/do_halee
-[crates-url]: https://crates.io/crates/argone
-[license-url]: https://github.com/just-do-halee/argone
-| [Examples](https://github.com/just-do-halee/argone/tree/main/examples) | [Docs](https://docs.rs/argone) | [Latest Note](https://github.com/just-do-halee/argone/blob/main/CHANGELOG.md) | 
-
-```toml
-[dependencies]
-argone = "0.2"
-```
-
----
-
-## *Phases*
-
-1. Parsing `clap`.
-2. If clap-argument is `None`<br>and the argument has `[Config]` mark<br>then extract data from `Config(file or env)`.
-3. When the data is extracted and that was empty,<br>eventually set Default(=) value.
-
----
-
-# `Example`
-##### * ***basics***
-```rust
 use argone::{ARGS, COMMANDS};
 
 ARGS! {
@@ -140,5 +99,3 @@ fn main() {
         println!("none subcommands");
     }
 }
-
-```

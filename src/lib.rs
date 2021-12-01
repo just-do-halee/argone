@@ -1,4 +1,11 @@
+// Licensed under either of Apache License, Version 2.0 or MIT license at your option.
 // Copyright 2021 Hwakyeom Kim(=just-do-halee)
+
+//! # **`argone`**
+//!
+//! Most intuitive global cli maker. *(lazy_static + config-rs + clap)<br>
+//!
+//! <a href="https://github.com/just-do-halee/argone/tree/main/examples">Examples</a>
 
 #![allow(unused)]
 
@@ -98,8 +105,10 @@ macro_rules! ARGS {
     };
 
     (
+        $(#[$main_meta:meta])*
         $(version = $version:literal)?
         $(author = $author:literal)?
+        $(about = $about:literal)?
         $(Config {
             file = $config_file:literal
             $(prefix = $config_prefix:literal)?
@@ -119,7 +128,8 @@ macro_rules! ARGS {
 
         ARGS!(
             @Args {
-                #[clap($(version = $version,)? $(author = $author)?)]
+                $(#[$main_meta])*
+                #[clap($(version = $version,)? $(author = $author,)? $(about = $about)?)]
                 $(
                     $(#[$args_meta])*
                     $([$tt])? $args_name: $args_ty $(= $args_default)?,
@@ -142,12 +152,13 @@ macro_rules! ARGS {
 #[macro_export]
 macro_rules! COMMANDS {
     (
-        $name:ident {
+        $($name:ident {
             $(
                 $(#[$meta:meta])*
                 $command_name:ident {
                 $(version = $version:literal)?
                 $(author = $author:literal)?
+                $(about = $about:literal)?
                 $(
                     Args {
                         $(
@@ -162,15 +173,15 @@ macro_rules! COMMANDS {
                     commands = $subcommands:ty
                 )?
             })+
-        }
+        })+
     ) => {
 
-        #[allow(non_snake_case)]
-        #[derive(Debug, clap::Parser)]
+        $(#[allow(non_snake_case)]
+        #[derive(Debug, Clone, PartialEq, Eq, clap::Parser)]
         pub enum $name {
             $(
                 $(#[$meta])*
-                #[clap($(version = $version,)? $(author = $author)?)]
+                #[clap($(version = $version,)? $(author = $author,)? $(about = $about)?)]
                 $command_name {
                     $($(
                         $(#[$args_meta])*
@@ -183,7 +194,7 @@ macro_rules! COMMANDS {
                     )?
                 },
             )+
-        }
+        })+
 
     };
 }
@@ -191,78 +202,10 @@ macro_rules! COMMANDS {
 use std::{env, path::PathBuf};
 
 lazy_static::lazy_static! {
-    pub static ref CURRENT_EXE: String = env::current_exe()
+    pub static ref CURRENT_EXE: PathBuf = env::current_exe()
         .unwrap()
         .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .to_owned();
+        .map(PathBuf::from)
+        .unwrap();
     pub static ref CURRENT_DIR: PathBuf = env::current_dir().unwrap();
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    ARGS! {
-        version = "0.1"
-        author = "just-do-halee <just.do.halee@gmail.com>"
-
-        Config {
-            file = "loxconfig"
-            prefix = "LOX"
-            // panic = ("couldn't find {} file.", "loxconfig")
-        }
-
-        Args {
-            /// Root directory
-            [Config] rootDir: Option<PathBuf> = CURRENT_DIR.clone()
-
-            /// Sets a custom config file
-            #[clap(short, long, default_value = "test")]
-            name: String
-
-            /// A level of verbosity, and can be used multiple times
-            #[clap(short, long, parse(from_occurrences))]
-            verbose: u8
-        }
-
-        commands = Sub
-    }
-
-    COMMANDS! {
-        Sub {
-
-            /// first
-            First {
-                version = "1.0"
-                author = "just-do-halee <just.do.halee@gmail.com>"
-                Args {
-                    /// Test String
-                    test: String
-                }
-            }
-
-            /// second
-            Second {
-                Args {
-                    // Test u8
-                    test: u8
-                }
-            }
-
-        }
-    }
-
-    #[test]
-    fn it_works() {
-        // assert_eq!(
-        //     format!("{:?}", *ARGS),
-        //     format!(
-        //         "Args {{ rootDir: Some(\"{}\"), name: \"test\", verbose: 0, commands: None }}",
-        //         CURRENT_DIR.display()
-        //     )
-        // );
-    }
 }

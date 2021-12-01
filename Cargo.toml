@@ -1,6 +1,6 @@
 [package]
 name = "argone"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
     "just-do-halee <just.do.halee@gmail.com>"
     ]
@@ -12,6 +12,13 @@ documentation = "https://docs.rs/argone"
 description = "Most intuitive global cli maker. *(lazy_static + config-rs + clap)"
 
 readme = "README.md"
+
+include = [
+	"src/**/*",
+	"Cargo.toml",
+	"LICENSE_*",
+	"README.md"
+]
 
 keywords = [
     "cli",
@@ -34,3 +41,4 @@ edition = "2021"
 lazy_static = "1.4"
 config = "0.11"
 clap = "3.0.0-beta.5"
+
