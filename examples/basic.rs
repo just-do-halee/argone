@@ -1,4 +1,4 @@
-use argone::{ARGS, COMMANDS};
+use argone::{prelude::*, *};
 
 ARGS! {
 

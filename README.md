@@ -23,7 +23,7 @@ Most intuitive global cli maker. *(lazy_static + config-rs + clap)
 
 ```toml
 [dependencies]
-argone = "0.2"
+argone = "0.3"
 ```
 
 ---
@@ -39,7 +39,7 @@ argone = "0.2"
 # `Example`
 ##### * ***basics***
 ```rust
-use argone::{ARGS, COMMANDS};
+use argone::{prelude::*, *};
 
 ARGS! {
 

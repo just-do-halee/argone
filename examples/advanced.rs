@@ -1,4 +1,4 @@
-use argone::{ARGS, COMMANDS, CURRENT_DIR, CURRENT_EXE};
+use argone::{prelude::*, *};
 use std::path::PathBuf;
 
 ARGS! {

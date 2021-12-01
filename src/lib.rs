@@ -80,10 +80,6 @@ macro_rules! ARGS {
             )*
         }
     ) => {
-
-        use clap::{AppSettings, Parser, SubCommand};
-        use config::{self, Config};
-
         #[allow(non_snake_case)]
         #[derive(Debug, Parser)]
         #[$meta]
@@ -142,7 +138,7 @@ macro_rules! ARGS {
             }
         );
 
-        lazy_static::lazy_static! {
+        lazy_static! {
             pub static ref ARGS: Args = ARGS!(@Parse $($config_file, $($config_prefix)?, $( ($($config_panic),*) )?)?);
         }
 
@@ -177,7 +173,7 @@ macro_rules! COMMANDS {
     ) => {
 
         $(#[allow(non_snake_case)]
-        #[derive(Debug, Clone, PartialEq, Eq, clap::Parser)]
+        #[derive(Debug, Clone, PartialEq, Eq, Parser)]
         pub enum $name {
             $(
                 $(#[$meta])*
@@ -199,9 +195,15 @@ macro_rules! COMMANDS {
     };
 }
 
+pub mod prelude {
+    pub use clap::{self, Parser};
+    pub use config;
+    pub use lazy_static::lazy_static;
+}
+
 use std::{env, path::PathBuf};
 
-lazy_static::lazy_static! {
+prelude::lazy_static! {
     pub static ref CURRENT_EXE: PathBuf = env::current_exe()
         .unwrap()
         .file_name()
