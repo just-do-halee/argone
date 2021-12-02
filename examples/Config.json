@@ -1,3 +1,4 @@
 {
-    "age": 50
+    "age": 50,
+    "job": ["student", "worker"]
 }

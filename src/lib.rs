@@ -11,11 +11,11 @@
 
 #[macro_export]
 macro_rules! ARGS {
-    (@SomeOrNone $yes:expr) => {
-        Some($yes)
+    (@PassOrB $a:expr, $b:expr) => {
+        $a
     };
-    (@SomeOrNone) => {
-        None
+    (@PassOrB , $b:expr) => {
+        $b
     };
     (@Parse) => {
         Args::parse()
@@ -58,31 +58,36 @@ macro_rules! ARGS {
         }
     };
 
-    (@SetConfig @If $conf:expr, $opts:expr, $ident:ident,,)
+    (@SetConfig @If $conf:expr, $opts:expr, $name:ident,)
     => {
     };
-    (@SetConfig @If $conf:expr, $opts:expr, $ident:ident, [Config], $($def_val:expr)?)
+    (@SetConfig @If $conf:expr, $opts:expr, [Config] $name:ident, $($default:expr)?)
     => {
-        if $opts.$ident == None {
-             $opts.$ident = if let Ok(v) = $conf.get(stringify!($ident)) { Some(v) }
+        if $opts.$name.is_empty_or_none() {
+             $opts.$name = if let Ok(v) = $conf.get(stringify!($name)) {
+                                v
+                            }
                             else {
-                                ARGS!(@SomeOrNone $($def_val)?)
+                                ARGS!(@PassOrB $($default)?, $opts.$name)
                             };
         }
     };
 
+
     (
         @Args {
-            #[$meta:meta]
+            {
+                $(#[$meta:meta])*
+            }
             $(
                 $(#[$f_meta:meta])*
-                $([$tt:tt])? $name:ident: $ty:ty $(= $default:expr)?,
+                $([$tt:tt])? $name:ident: $ty:ty$( = $default:expr)?,
             )*
         }
     ) => {
         #[allow(non_snake_case)]
         #[derive(Debug, Parser)]
-        #[$meta]
+        $(#[$meta])*
         pub struct Args {
             $(
                 $(#[$f_meta])*
@@ -93,7 +98,7 @@ macro_rules! ARGS {
             pub fn parse_with_config(conf: config::Config) -> Self {
                 let mut opts = Args::parse();
                 $(
-                    ARGS!(@SetConfig @If conf, opts, $name, $([$tt])?, $($default)?);
+                    ARGS!(@SetConfig @If conf, opts, $([$tt])? $name, $($default)?);
                 )*
                 opts
             }
@@ -102,33 +107,37 @@ macro_rules! ARGS {
 
     (
         $(#[$main_meta:meta])*
-        $(version = $version:literal)?
-        $(author = $author:literal)?
-        $(about = $about:literal)?
+        $(version = $version:literal $(;)?$(,)?)?
+        $(author = $author:literal $(;)?$(,)?)?
+        $(about = $about:literal $(;)?$(,)?)?
         $(Config {
-            file = $config_file:literal
-            $(prefix = $config_prefix:literal)?
-            $(panic = ($($config_panic:expr),*))?
+            file = $config_file:literal $(;)?$(,)?
+            $(prefix = $config_prefix:literal $(;)?$(,)?)?
+            $(panic = ($($config_panic:expr),*) $(;)?$(,)?)?
         })?
         Args {
             $(
                 $(#[$args_meta:meta])*
-                $([$tt:tt])? $args_name:ident: $args_ty:ty $(= $args_default:expr)?
+                $(($($clap_arg:stmt),*))?
+                $([$tt:tt])? $args_name:ident: $args_ty:ty $(= $args_default:expr)? $(;)?$(,)?
             )+
         }
         $(
             $(#[$subcommands_meta:meta])*
-            commands = $subcommands:ty
+            commands = $subcommands:ty $(;)?$(,)?
         )?
     ) => {
 
         ARGS!(
             @Args {
-                $(#[$main_meta])*
-                #[clap($(version = $version,)? $(author = $author,)? $(about = $about)?)]
+                {
+                    $(#[$main_meta])*
+                    #[clap($(version = $version,)? $(author = $author,)? $(about = $about,)?)]
+                }
                 $(
                     $(#[$args_meta])*
-                    $([$tt])? $args_name: $args_ty $(= $args_default)?,
+                    $(#[clap($($clap_arg),*)])?
+                    $([$tt])? $args_name: $args_ty$(= $args_default)?,
                 )+
                 $(
                     $(#[$subcommands_meta])*
@@ -148,9 +157,12 @@ macro_rules! ARGS {
 #[macro_export]
 macro_rules! COMMANDS {
     (
-        $($name:ident {
+        $(
+            $(#[$main_meta:meta])*
+            $name:ident {
             $(
                 $(#[$meta:meta])*
+                $(($($clap_arg:stmt),*))?
                 $command_name:ident {
                 $(version = $version:literal)?
                 $(author = $author:literal)?
@@ -174,9 +186,11 @@ macro_rules! COMMANDS {
 
         $(#[allow(non_snake_case)]
         #[derive(Debug, Clone, PartialEq, Eq, Parser)]
+        $(#[$main_meta])*
         pub enum $name {
             $(
                 $(#[$meta])*
+                $(#[clap($($clap_arg),*)])?
                 #[clap($(version = $version,)? $(author = $author,)? $(about = $about)?)]
                 $command_name {
                     $($(
@@ -199,6 +213,25 @@ pub mod prelude {
     pub use clap::{self, Parser};
     pub use config;
     pub use lazy_static::lazy_static;
+
+    use std::any::Any;
+    pub trait ArgOne {
+        fn is_empty_or_none(&self) -> bool;
+    }
+
+    impl<T> ArgOne for Option<T> {
+        #[inline]
+        fn is_empty_or_none(&self) -> bool {
+            self.is_none()
+        }
+    }
+
+    impl<T> ArgOne for Vec<T> {
+        #[inline]
+        fn is_empty_or_none(&self) -> bool {
+            self.is_empty()
+        }
+    }
 }
 
 use std::{env, path::PathBuf};
