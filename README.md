@@ -23,7 +23,7 @@ Most intuitive global cli maker. *(lazy_static + config-rs + clap)
 
 ```toml
 [dependencies]
-argone = "0.3"
+argone = "0.4"
 ```
 
 ---
@@ -63,34 +63,38 @@ ARGS! {
 
         /// This argument is connected to Config(file or env).
         /// Template is
-        /// [Config] $name: Option<$type> = $default_value
+        /// [Config] $name: Option<$type> = Some($default_value) or
+        /// [Config] $name: Vec<$type> = vec![$default_values]
         /// and this works in non-required argument.
-        [Config] age: Option<u8> = 12
+        [Config] age: Option<u8> = Some(12),
+        [Config] job: Vec<String>
 
         // And all arugments are working on clap_derive format.
 
         /// Exactly same with clap_derive.
-        #[clap(short, long)]
-        job: Vec<String>
+        (short, long)
+        parents: Vec<String>
 
-        /// But #[clap(default_value = "..")] doesn't work
-        /// to the config arguments. instead, this would work.
-        #[clap(short, long, name = "WEIGHT")]
-        [Config] weight: Option<u8> = 50
+        /// But (default_value = "..") doesn't work to
+        /// the config arguments. instead, this would work.
+        (short, long, name = "WEIGHT")
+        [Config] weight: Option<u8> = Some(50)
 
         /// In normal arguments, default_value will work.
-        #[clap(short, long, default_value = "1")]
+        (short, long, default_value = "1")
         verbose: u8
 
     }
 
     commands = Sub
+
 }
 
 COMMANDS! {
     Sub {
 
-        /// The first subcommand
+        /// The subcommand
+        /// but subcommands do not have config arguments.
         First {
             version = "1.0"
             author = "just-do-halee <just.do.halee@gmail.com>"
@@ -122,7 +126,11 @@ fn main() {
     }
 
     for job in &ARGS.job {
-        println!("{}", job);
+        println!("job: {}", job);
+    }
+
+    for parents in &ARGS.parents {
+        println!("parent: {}", parents);
     }
 
     println!(
@@ -140,5 +148,4 @@ fn main() {
         println!("none subcommands");
     }
 }
-
 ```
