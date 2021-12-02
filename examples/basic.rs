@@ -1,6 +1,6 @@
 use argone::{prelude::*, *};
 
-ARGS! {
+ARGONE! {
 
     version = "0.1"
     author = "just-do-halee <just.do.halee@gmail.com>"

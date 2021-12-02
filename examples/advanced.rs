@@ -1,7 +1,8 @@
 use argone::{prelude::*, *};
 use std::path::PathBuf;
 
-ARGS! {
+ARGONE! {
+
     /// this area is top of the clap struct meta area.
     #[derive(Clone)]
     #[clap(after_help = "My Application")]

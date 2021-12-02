@@ -10,7 +10,7 @@
 #![allow(unused)]
 
 #[macro_export]
-macro_rules! ARGS {
+macro_rules! ARGONE {
     (@PassOrB $a:expr, $b:expr) => {
         $a
     };
@@ -25,7 +25,7 @@ macro_rules! ARGS {
             let mut conf = config::Config::default();
             // ini | json | json5 | yaml | toml | ron
             // arg's prefix must be '$prefix'. ex:) LOX_...
-            ARGS!(@SetConfig conf, $file, $($prefix)?, $( ($($config_panic),*) )?)
+            ARGONE!(@SetConfig conf, $file, $($prefix)?, $( ($($config_panic),*) )?)
         })
     };
     (@SetConfig $config:expr, $file:literal, ,) => {
@@ -68,7 +68,7 @@ macro_rules! ARGS {
                                 v
                             }
                             else {
-                                ARGS!(@PassOrB $($default)?, $opts.$name)
+                                ARGONE!(@PassOrB $($default)?, $opts.$name)
                             };
         }
     };
@@ -98,7 +98,7 @@ macro_rules! ARGS {
             pub fn parse_with_config(conf: config::Config) -> Self {
                 let mut opts = Args::parse();
                 $(
-                    ARGS!(@SetConfig @If conf, opts, $([$tt])? $name, $($default)?);
+                    ARGONE!(@SetConfig @If conf, opts, $([$tt])? $name, $($default)?);
                 )*
                 opts
             }
@@ -128,7 +128,7 @@ macro_rules! ARGS {
         )?
     ) => {
 
-        ARGS!(
+        ARGONE!(
             @Args {
                 {
                     $(#[$main_meta])*
@@ -148,7 +148,7 @@ macro_rules! ARGS {
         );
 
         lazy_static! {
-            pub static ref ARGS: Args = ARGS!(@Parse $($config_file, $($config_prefix)?, $( ($($config_panic),*) )?)?);
+            pub static ref ARGS: Args = ARGONE!(@Parse $($config_file, $($config_prefix)?, $( ($($config_panic),*) )?)?);
         }
 
     };

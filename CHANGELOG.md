@@ -1,4 +1,14 @@
 
+## 0.5.0 (December 3, 2021)
+
+### Release 0.5.0
+
+* To prevent a conflict
+* between the macro name and the structure name,
+* the macro was renamed `ARGONE`.
+
+---
+
 ## 0.4.0 (December 3, 2021)
 
 ### Release 0.4.0
