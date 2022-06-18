@@ -1,6 +1,6 @@
 [package]
 name = "argone"
-version = "0.5.1"
+version = "0.5.2"
 authors = [
     "just-do-halee <just.do.halee@gmail.com>"
     ]
@@ -33,7 +33,7 @@ categories = [
     ]
 
 license = "MIT OR Apache-2.0"
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
